@@ -1,133 +1,279 @@
--- 0. DATABASE SETUP
-
-DROP DATABASE IF EXISTS Library_audit_system;
-CREATE DATABASE Library_audit_system;
-USE Library_audit_system;
-
--- 1. TABLE CREATION (DDL)
+DROP TABLE IF EXISTS IssuedBooks;
+DROP TABLE IF EXISTS Students;
+DROP TABLE IF EXISTS Books;
 
 CREATE TABLE Books (
-    BookID INT PRIMARY KEY,
-    Title VARCHAR(100) NOT NULL,
-    Author VARCHAR(100),
-    Category VARCHAR(50),
-    AvailableCopies INT
+    BookID INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(200) NOT NULL,
+    Author VARCHAR(150) NOT NULL,
+    Category VARCHAR(80) NOT NULL,
+    AvailableCopies INT NOT NULL DEFAULT 1,
+    UNIQUE (Title, Author)
 );
 
 CREATE TABLE Students (
-    StudentID INT PRIMARY KEY,
-    Name VARCHAR(100) NOT NULL,
-    Email VARCHAR(100) UNIQUE,
-    Department VARCHAR(50),
-    JoinDate DATE,
-    Status VARCHAR(20) DEFAULT 'Active'
+    StudentID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(120) NOT NULL,
+    Email VARCHAR(150) NOT NULL UNIQUE,
+    Department VARCHAR(100) NOT NULL,
+    JoinDate DATE NOT NULL DEFAULT (CURDATE()),
+    Status VARCHAR(20) NOT NULL DEFAULT 'Active'
 );
 
 CREATE TABLE IssuedBooks (
-    IssueID INT PRIMARY KEY,
-    BookID INT,
-    StudentID INT,
-    IssueDate DATE NOT NULL,
-    ReturnDate DATE,
+    IssueID INT AUTO_INCREMENT PRIMARY KEY,
+    BookID INT NOT NULL,
+    StudentID INT NOT NULL,
+    IssueDate DATE NOT NULL DEFAULT (CURDATE()),
+    ReturnDate DATE NULL,
     FOREIGN KEY (BookID) REFERENCES Books(BookID),
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID)
 );
 
+CREATE INDEX idx_issuedbooks_studentid ON IssuedBooks(StudentID);
+CREATE INDEX idx_issuedbooks_bookid ON IssuedBooks(BookID);
+CREATE INDEX idx_issuedbooks_issuedate ON IssuedBooks(IssueDate);
+CREATE INDEX idx_issuedbooks_returndate ON IssuedBooks(ReturnDate);
+CREATE INDEX idx_books_category ON Books(Category);
+CREATE INDEX idx_students_status ON Students(Status);
 
--- 2. INSERT SAMPLE DATA
+INSERT INTO Books (Title, Author, Category, AvailableCopies) VALUES
+('Introduction to Algorithms','Cormen et al.','Technology', 3),
+('Clean Code',  'Robert C. Martin', 'Technology', 2),
+('The Pragmatic Programmer', 'Hunt & Thomas',Technology', 4),
+('Artificial Intelligence: A Guide', 'Stuart Russell', 'Technology',1),
+('Database System Concepts', 'Silberschatz et al.', 'Technology',2),
 
+('To Kill a Mockingbird', 'Harper Lee', 'Literature',5),
+('1984', 'George Orwell',  'Literature',  4),
+('The Great Gatsby', 'F. Scott Fitzgerald', 'Literature',3),
+('Pride and Prejudice', 'Jane Austen', 'Literature', 6),
+('Of Mice and Men', 'John Steinbeck', 'Literature', 2),
 
-INSERT INTO Books VALUES
-(1, 'Database Systems', 'Korth', 'Education', 5),
-(2, 'Operating Systems', 'Galvin', 'Education', 3),
-(3, 'The Alchemist', 'Paulo Coelho', 'Fiction', 4),
-(4, 'Brief History of Time', 'Stephen Hawking', 'Science', 2),
-(5, 'World War II', 'Winston Churchill', 'History', 3);
+('A Brief History of Time', 'Stephen Hawking', 'Science', 3),
+('The Selfish Gene','Richard Dawkins','Science', 2),
+('Cosmos', 'Carl Sagan', 'Science', 4),
+('The Gene: An Intimate History','Siddhartha Mukherjee','Science',1),
+('Sapiens',  'Yuval Noah Harari', 'Science',  5),
 
-INSERT INTO Students VALUES
-(101, 'Arun Kumar', 'arun@example.com', 'CSE', '2021-06-10', 'Active'),
-(102, 'Priya Sharma', 'priya@example.com', 'ECE', '2022-01-15', 'Active'),
-(103, 'Rahul Das', 'rahul@example.com', 'MECH', '2020-03-20', 'Active'),
-(104, 'Sneha Iyer', 'sneha@example.com', 'IT', '2019-08-05', 'Active'),
-(105, 'Kiran Patel', 'kiran@example.com', 'CIVIL', '2018-09-12', 'Active');
+('Calculus Made Easy', 'Silvanus Thompson', 'Mathematics', 3),
+('How to Prove It', 'Daniel Velleman', 'Mathematics', 2),
+('The Art of Problem Solving', 'Richard Rusczyk', 'Mathematics', 4),
+('Linear Algebra Done Right', 'Sheldon Axler','Mathematics', 1),
+('Mathematics for the Million',   'Lancelot Hogben', 'Mathematics', 2),
 
-INSERT INTO IssuedBooks VALUES
-(1, 1, 101, CURRENT_DATE - INTERVAL 20 DAY, NULL),
-(2, 2, 102, CURRENT_DATE - INTERVAL 10 DAY, NULL),
-(3, 3, 103, CURRENT_DATE - INTERVAL 30 DAY, CURRENT_DATE - INTERVAL 5 DAY),
-(4, 4, 104, CURRENT_DATE - INTERVAL 25 DAY, NULL),
-(5, 5, 105, CURRENT_DATE - INTERVAL 1200 DAY, NULL);
+('Guns, Germs, and Steel','Jared Diamond','History', 3),
+('The Silk Roads',  'Peter Frankopan','History',  2),
+('A People''s History of the US','Howard Zinn', 'History', 2),
+('The Rise and Fall of the Dinosaurs', 'Steve Brusatte', 'History',1),
+('Empire of the Sun', 'J. G. Ballard',  'History',2),
 
+('Atomic Habits', 'James Clear', 'Self-Help',6),
+('Deep Work', 'Cal Newport','Self-Help', 4),
+('The 7 Habits of Highly Effective People', 'Stephen Covey',Self-Help', 5),
+('Thinking, Fast and Slow', 'Daniel Kahneman',  'Self-Help', 3),
+('Man''s Search for Meaning','Viktor Frankl','Self-Help', 4);
+ 
+ 
+-- -------------------------------------------------------
+-- Students (20 records)
+-- -------------------------------------------------------
+INSERT INTO Students (Name, Email, Department, JoinDate, Status) VALUES
+('Arjun Sharma',   'arjun.sharma@college.edu',   'Computer Science', '2022-06-15', 'Active'),
+('Priya Nair',     'priya.nair@college.edu',     'Electronics',      '2021-07-20', 'Active'),
+('Rahul Menon',    'rahul.menon@college.edu',    'Mechanical',       '2020-08-10', 'Active'),
+('Sneha Iyer',     'sneha.iyer@college.edu',     'Civil',            '2023-01-05', 'Active'),
+('Karan Patel',    'karan.patel@college.edu',    'Computer Science', '2019-06-30', 'Active'),
+('Divya Krishnan', 'divya.krishnan@college.edu', 'Mathematics',      '2022-09-12', 'Active'),
+('Aakash Reddy',   'aakash.reddy@college.edu',   'Physics',          '2021-03-18', 'Active'),
+('Meera Pillai',   'meera.pillai@college.edu',   'Chemistry',        '2020-11-25', 'Active'),
+('Rohan Verma',    'rohan.verma@college.edu',    'Electronics',      '2018-07-14', 'Active'),
+('Anjali Singh',   'anjali.singh@college.edu',   'Computer Science', '2023-02-28', 'Active'),
+('Vijay Kumar',    'vijay.kumar@college.edu',    'Mechanical',       '2017-05-10', 'Active'),
+('Lakshmi Devi',   'lakshmi.devi@college.edu',   'Civil',            '2016-08-22', 'Active'),
+('Suresh Babu',    'suresh.babu@college.edu',    'Mathematics',      '2016-03-15', 'Active'),
+('Nisha Thomas',   'nisha.thomas@college.edu',   'Physics',          '2015-09-01', 'Active'),
+('Praveen Raj',    'praveen.raj@college.edu',    'Chemistry',        '2022-04-17', 'Active'),
+('Kavitha Menon',  'kavitha.menon@college.edu',  'Computer Science', '2023-06-10', 'Active'),
+('Deepak Nair',    'deepak.nair@college.edu',    'Electronics',      '2021-10-05', 'Active'),
+('Ramya Pillai',   'ramya.pillai@college.edu',   'Mechanical',       '2020-12-20', 'Active'),
+('Sanjay Gupta',   'sanjay.gupta@college.edu',   'Civil',            '2019-02-14', 'Active'),
+('Pooja Sharma',   'pooja.sharma@college.edu',   'Mathematics',      '2023-08-01', 'Active');
 
--- 3. OVERDUE BOOKS QUERY
-
-
-SELECT 
+INSERT INTO IssuedBooks (BookID, StudentID, IssueDate, ReturnDate) VALUES
+-- Returned on time
+(1,  1,  DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_SUB(CURDATE(), INTERVAL 20 DAY)),
+(2,  2,  DATE_SUB(CURDATE(), INTERVAL 25 DAY), DATE_SUB(CURDATE(), INTERVAL 15 DAY)),
+(6,  3,  DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_SUB(CURDATE(), INTERVAL 10 DAY)),
+(11, 4,  DATE_SUB(CURDATE(), INTERVAL 18 DAY), DATE_SUB(CURDATE(), INTERVAL  8 DAY)),
+(16, 5,  DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_SUB(CURDATE(), INTERVAL  5 DAY)),
+(21, 6,  DATE_SUB(CURDATE(), INTERVAL 12 DAY), DATE_SUB(CURDATE(), INTERVAL  3 DAY)),
+(26, 7,  DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_SUB(CURDATE(), INTERVAL  2 DAY)),
+(3,  8,  DATE_SUB(CURDATE(), INTERVAL  8 DAY), DATE_SUB(CURDATE(), INTERVAL  1 DAY)),
+(7,  9,  DATE_SUB(CURDATE(), INTERVAL  7 DAY), CURDATE()),
+(12, 10, DATE_SUB(CURDATE(), INTERVAL  6 DAY), CURDATE()),
+-- Currently borrowed (within 14 days — not overdue)
+(17, 11, DATE_SUB(CURDATE(), INTERVAL  5 DAY), NULL),
+(22, 12, DATE_SUB(CURDATE(), INTERVAL  4 DAY), NULL),
+(27, 13, DATE_SUB(CURDATE(), INTERVAL  3 DAY), NULL),
+(4,  14, DATE_SUB(CURDATE(), INTERVAL  2 DAY), NULL),
+(8,  15, DATE_SUB(CURDATE(), INTERVAL  1 DAY), NULL),
+-- OVERDUE — not returned, past 14 days
+(5,  1,  DATE_SUB(CURDATE(), INTERVAL 20 DAY), NULL),  -- 6 days overdue
+(9,  2,  DATE_SUB(CURDATE(), INTERVAL 25 DAY), NULL),  -- 11 days overdue
+(13, 3,  DATE_SUB(CURDATE(), INTERVAL 30 DAY), NULL),  -- 16 days overdue
+(18, 4,  DATE_SUB(CURDATE(), INTERVAL 35 DAY), NULL),  -- 21 days overdue
+(23, 5,  DATE_SUB(CURDATE(), INTERVAL 40 DAY), NULL),  -- 26 days overdue
+(28, 6,  DATE_SUB(CURDATE(), INTERVAL 45 DAY), NULL),  -- 31 days overdue
+(10, 7,  DATE_SUB(CURDATE(), INTERVAL 50 DAY), NULL),  -- 36 days overdue
+(14, 8,  DATE_SUB(CURDATE(), INTERVAL 55 DAY), NULL),  -- 41 days overdue
+(19, 9,  DATE_SUB(CURDATE(), INTERVAL 60 DAY), NULL),  -- 46 days overdue
+(24, 10, DATE_SUB(CURDATE(), INTERVAL 16 DAY), NULL),  -- 2 days overdue
+-- Extra borrowing history for popularity stats
+(1,  11, DATE_SUB(CURDATE(), INTERVAL 90 DAY), DATE_SUB(CURDATE(), INTERVAL 80 DAY)),
+(26, 12, DATE_SUB(CURDATE(), INTERVAL 85 DAY), DATE_SUB(CURDATE(), INTERVAL 75 DAY)),
+(26, 13, DATE_SUB(CURDATE(), INTERVAL 75 DAY), DATE_SUB(CURDATE(), INTERVAL 65 DAY)),
+(11, 14, DATE_SUB(CURDATE(), INTERVAL 70 DAY), DATE_SUB(CURDATE(), INTERVAL 60 DAY)),
+(1,  15, DATE_SUB(CURDATE(), INTERVAL 65 DAY), DATE_SUB(CURDATE(), INTERVAL 55 DAY)),
+(26, 16, DATE_SUB(CURDATE(), INTERVAL 60 DAY), DATE_SUB(CURDATE(), INTERVAL 50 DAY)),
+(6,  17, DATE_SUB(CURDATE(), INTERVAL 55 DAY), DATE_SUB(CURDATE(), INTERVAL 45 DAY)),
+(27, 18, DATE_SUB(CURDATE(), INTERVAL 50 DAY), DATE_SUB(CURDATE(), INTERVAL 40 DAY)),
+(2,  19, DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 35 DAY)),
+(16, 20, DATE_SUB(CURDATE(), INTERVAL 40 DAY), DATE_SUB(CURDATE(), INTERVAL 30 DAY));
+ 
+-- SECTION 4: VIEWS
+CREATE VIEW vw_OverdueBooks AS
+SELECT
+    s.StudentID,
     s.Name AS StudentName,
+    s.Email,
+    s.Department,
     b.Title AS BookTitle,
-    i.IssueDate,
-    DATEDIFF(CURRENT_DATE, i.IssueDate) AS DaysOverdue
-FROM IssuedBooks i
-JOIN Students s ON i.StudentID = s.StudentID
-JOIN Books b ON i.BookID = b.BookID
-WHERE i.ReturnDate IS NULL
-AND i.IssueDate < CURRENT_DATE - INTERVAL 14 DAY;
-
-
--- 4. PENALTY REPORT (₹5 per day after 14 days)
-
-
-SELECT 
-    s.Name AS StudentName,
-    b.Title AS BookTitle,
-    (DATEDIFF(CURRENT_DATE, i.IssueDate) - 14) AS OverdueDays,
-    (DATEDIFF(CURRENT_DATE, i.IssueDate) - 14) * 5 AS PenaltyAmount
-FROM IssuedBooks i
-JOIN Students s ON i.StudentID = s.StudentID
-JOIN Books b ON i.BookID = b.BookID
-WHERE i.ReturnDate IS NULL
-AND i.IssueDate < CURRENT_DATE - INTERVAL 14 DAY;
-
-
--- 5. BOOK POPULARITY ANALYSIS
-
-
-SELECT 
     b.Category,
-    COUNT(i.IssueID) AS TimesBorrowed
-FROM IssuedBooks i
-JOIN Books b ON i.BookID = b.BookID
+    ib.IssueID,
+    ib.IssueDate,
+    DATEDIFF(CURRENT_DATE, ib.IssueDate) AS DaysSinceIssue,
+    DATEDIFF(CURRENT_DATE, ib.IssueDate) - 14 AS DaysOverdue
+FROM IssuedBooks ib
+JOIN Students s ON ib.StudentID = s.StudentID
+JOIN Books b ON ib.BookID = b.BookID
+WHERE ib.ReturnDate IS NULL
+AND ib.IssueDate < DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)
+ORDER BY DaysOverdue DESC;
+
+CREATE VIEW vw_PenaltyReport AS
+SELECT
+    s.StudentID,
+    s.Name AS StudentName,
+    s.Email,
+    b.Title AS BookTitle,
+    ib.IssueDate,
+    DATEDIFF(CURRENT_DATE, ib.IssueDate) - 14 AS OverdueDays,
+    (DATEDIFF(CURRENT_DATE, ib.IssueDate) - 14) * 5 AS TotalPenalty_INR
+FROM IssuedBooks ib
+JOIN Students s ON ib.StudentID = s.StudentID
+JOIN Books b ON ib.BookID = b.BookID
+WHERE ib.ReturnDate IS NULL
+AND ib.IssueDate < DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)
+ORDER BY TotalPenalty_INR DESC;
+
+CREATE VIEW vw_CategoryPopularity AS
+SELECT
+    b.Category,
+    COUNT(ib.IssueID) AS TimesBorrowed
+FROM IssuedBooks ib
+JOIN Books b ON ib.BookID = b.BookID
 GROUP BY b.Category
 ORDER BY TimesBorrowed DESC;
 
+CREATE VIEW vw_InactiveStudents AS
+SELECT
+    s.StudentID,
+    s.Name,
+    s.Email,
+    s.Department,
+    s.JoinDate,
+    MAX(ib.IssueDate) AS LastBorrowDate
+FROM Students s
+LEFT JOIN IssuedBooks ib ON s.StudentID = ib.StudentID
+GROUP BY s.StudentID, s.Name, s.Email, s.Department, s.JoinDate
+HAVING MAX(ib.IssueDate) < DATE_SUB(CURRENT_DATE, INTERVAL 3 YEAR)
+   OR MAX(ib.IssueDate) IS NULL
+ORDER BY LastBorrowDate IS NULL, LastBorrowDate ASC;
 
--- 6. MARK INACTIVE STUDENTS (3 YEARS)
+-- over due detection
 
-
-SET SQL_SAFE_UPDATES = 0;
-
-UPDATE Students s
-LEFT JOIN IssuedBooks i ON s.StudentID = i.StudentID
-SET s.Status = 'Inactive'
-GROUP BY s.StudentID
-HAVING MAX(i.IssueDate) IS NULL
-   OR MAX(i.IssueDate) < CURRENT_DATE - INTERVAL 3 YEAR;
-
-
--- 7. VIEW FOR OVERDUE REPORT
-
-
-CREATE VIEW OverdueReport AS
-SELECT 
+SELECT
     s.Name AS StudentName,
     b.Title AS BookTitle,
-    i.IssueDate,
-    DATEDIFF(CURRENT_DATE, i.IssueDate) AS DaysOverdue
-FROM IssuedBooks i
-JOIN Students s ON i.StudentID = s.StudentID
-JOIN Books b ON i.BookID = b.BookID
-WHERE i.ReturnDate IS NULL
-AND i.IssueDate < CURRENT_DATE - INTERVAL 14 DAY;
+    ib.IssueDate,
+    DATEDIFF(CURRENT_DATE, ib.IssueDate) - 14 AS DaysOverdue
+FROM IssuedBooks ib
+JOIN Students s ON ib.StudentID = s.StudentID
+JOIN Books b ON ib.BookID = b.BookID
+WHERE ib.ReturnDate IS NULL
+AND ib.IssueDate < DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)
+ORDER BY DaysOverdue DESC;
 
+-- penalty calculation
 
--- END OF PROJECT
+SELECT
+    s.Name AS StudentName,
+    b.Title AS BookTitle,
+    DATEDIFF(CURRENT_DATE, ib.IssueDate) - 14 AS OverdueDays,
+    (DATEDIFF(CURRENT_DATE, ib.IssueDate) - 14) * 5 AS TotalPenalty_INR
+FROM IssuedBooks ib
+JOIN Students s ON ib.StudentID = s.StudentID
+JOIN Books b ON ib.BookID = b.BookID
+WHERE ib.ReturnDate IS NULL
+AND ib.IssueDate < DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY)
+ORDER BY TotalPenalty_INR DESC;
+
+-- popularity
+
+SELECT
+    b.Category,
+    COUNT(ib.IssueID) AS TimesBorrowed
+FROM IssuedBooks ib
+JOIN Books b ON ib.BookID = b.BookID
+GROUP BY b.Category
+ORDER BY TimesBorrowed DESC;
+
+-- identify inactive students
+SELECT
+    s.StudentID,
+    s.Name,
+    s.Email,
+    s.Department,
+    s.JoinDate,
+    MAX(ib.IssueDate) AS LastBorrowDate
+FROM Students s
+LEFT JOIN IssuedBooks ib ON s.StudentID = ib.StudentID
+GROUP BY s.StudentID, s.Name, s.Email, s.Department, s.JoinDate
+HAVING MAX(ib.IssueDate) < DATE_SUB(CURRENT_DATE, INTERVAL 3 YEAR)
+   OR MAX(ib.IssueDate) IS NULL;
+
+-- update inactive students
+UPDATE Students s
+LEFT JOIN (
+    SELECT s.StudentID
+    FROM Students s
+    LEFT JOIN IssuedBooks ib ON s.StudentID = ib.StudentID
+    GROUP BY s.StudentID
+    HAVING MAX(ib.IssueDate) < DATE_SUB(CURRENT_DATE, INTERVAL 3 YEAR)
+        OR MAX(ib.IssueDate) IS NULL
+) AS temp ON s.StudentID = temp.StudentID
+SET s.Status = 'Inactive'
+WHERE temp.StudentID IS NOT NULL;
+
+-- verification
+SELECT 'Books' AS TableName, COUNT(*) FROM Books
+UNION ALL
+SELECT 'Students', COUNT(*) FROM Students
+UNION ALL
+SELECT 'IssuedBooks', COUNT(*) FROM IssuedBooks;
+
+SELECT * FROM vw_OverdueBooks;
+SELECT * FROM vw_PenaltyReport;
+SELECT * FROM vw_CategoryPopularity;
+SELECT * FROM vw_InactiveStudents;
